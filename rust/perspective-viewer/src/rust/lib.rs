@@ -29,6 +29,8 @@ mod theme;
 mod utils;
 
 use custom_elements::copy_dropdown::CopyDropDownMenuElement;
+use custom_elements::date_column_style::PerspectiveDateColumnStyleElement;
+use custom_elements::datetime_column_style::PerspectiveDatetimeColumnStyleElement;
 use custom_elements::export_dropdown::ExportDropDownMenuElement;
 use custom_elements::number_column_style::PerspectiveNumberColumnStyleElement;
 use custom_elements::string_column_style::PerspectiveStringColumnStyleElement;
@@ -55,19 +57,14 @@ pub fn get_exprtk_commands() -> Result<Box<[JsValue]>, JsValue> {
         .into_jserror()
 }
 
-// Handle `MonacoWebpackPlugin` and esbuild
-// #[wasm_bindgen(module = "/dist/pkg/viewer.js")]
-// extern "C" {
-//     #[wasm_bindgen(js_name = "bootstrap")]
-//     pub fn register_perspective_viewer();
-// }
-
 #[wasm_bindgen(js_name = "defineWebComponents")]
 pub fn define_web_components() {
     if cfg!(feature = "define_custom_elements_async") {
         define_web_component::<PerspectiveViewerElement>();
     }
 
+    define_web_component::<PerspectiveDateColumnStyleElement>();
+    define_web_component::<PerspectiveDatetimeColumnStyleElement>();
     define_web_component::<PerspectiveStringColumnStyleElement>();
     define_web_component::<PerspectiveNumberColumnStyleElement>();
     define_web_component::<ExportDropDownMenuElement>();

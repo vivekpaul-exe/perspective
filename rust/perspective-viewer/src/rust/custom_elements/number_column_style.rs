@@ -7,10 +7,10 @@
 // file.
 
 use crate::components::number_column_style::*;
+use crate::config::*;
 use crate::custom_elements::modal::*;
 use crate::utils::CustomElementMetadata;
 use crate::*;
-
 use wasm_bindgen::prelude::*;
 use web_sys::*;
 use yew::*;
@@ -49,32 +49,30 @@ impl PerspectiveNumberColumnStyleElement {
     /// * `config` - a `ColumnStyle` config in JSON form.
     /// * `default_config` - the default `ColumnStyle` config for this column
     ///   type, in JSON form.
-    pub fn reset(&mut self, config: JsValue, default_config: JsValue) -> Result<(), JsValue> {
-        let msg = NumberColumnStyleMsg::Reset(
-            config.into_serde().unwrap(),
-            default_config.into_serde().unwrap(),
-        );
-
+    pub fn reset(
+        &mut self,
+        config: NumberColumnStyleConfig,
+        default_config: NumberColumnStyleDefaultConfig,
+    ) -> Result<(), JsValue> {
+        let msg = NumberColumnStyleMsg::Reset(config.into(), default_config.into());
         self.modal.as_ref().into_jserror()?.send_message(msg);
         Ok(())
     }
 
-    /// Dispatches to `ModalElement::open(target)`
+    /// Dispatches to `ModalElement::open(target)` after lazy initializing the
+    /// `ModelElement` custom element handle.
     ///
     /// # Arguments
     /// `target` - the relative target to pin this `ModalElement` to.
     pub fn open(
         &mut self,
         target: web_sys::HtmlElement,
-        js_config: JsValue,
-        js_def_config: JsValue,
+        config: NumberColumnStyleConfig,
+        default_config: NumberColumnStyleDefaultConfig,
     ) -> Result<(), JsValue> {
         if self.modal.is_some() {
-            self.reset(js_config, js_def_config)?;
+            self.reset(config, default_config)?;
         } else {
-            let config: NumberColumnStyleConfig = js_config.into_serde().unwrap();
-            let default_config: NumberColumnStyleDefaultConfig =
-                js_def_config.into_serde().unwrap();
             let on_change = {
                 clone!(self.elem);
                 Callback::from(move |x: NumberColumnStyleConfig| on_change(&elem, &x))

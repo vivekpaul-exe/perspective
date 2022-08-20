@@ -6,8 +6,6 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-use crate::*;
-
 use wasm_bindgen::JsCast;
 use web_sys::*;
 use yew::prelude::*;
@@ -28,8 +26,7 @@ pub fn color_component(props: &ColorProps) -> Html {
             .value()
     });
 
-    html_template! {
-        <label>{ "Color" }</label>
+    html! {
         <input
             class="parameter"
             type="color"

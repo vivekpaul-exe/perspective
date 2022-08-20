@@ -14,34 +14,39 @@
 mod api_future;
 mod async_callback;
 mod blob;
+mod clone;
 mod closure;
 mod custom_element;
 mod datetime;
 mod debounce;
 mod download;
 mod errors;
-mod js_object;
+mod json;
 mod pubsub;
 mod request_animation_frame;
 mod scope;
+mod wasm_abi;
 mod weak_scope;
 
 #[cfg(test)]
 mod tests;
 
-pub use self::api_future::*;
-pub use self::async_callback::*;
-pub use self::blob::*;
-pub use self::closure::*;
-pub use self::custom_element::*;
-pub use self::datetime::*;
-pub use self::debounce::*;
-pub use self::download::*;
-pub use self::errors::*;
-pub use self::pubsub::*;
-pub use self::request_animation_frame::*;
-pub use self::scope::*;
-pub use self::weak_scope::*;
+pub use api_future::*;
+pub use async_callback::*;
+pub use blob::*;
+pub use clone::*;
+pub use closure::*;
+pub use custom_element::*;
+pub use datetime::*;
+pub use debounce::*;
+pub use download::*;
+pub use errors::*;
+pub use json::*;
+pub use pubsub::*;
+pub use request_animation_frame::*;
+pub use scope::*;
+pub use wasm_abi::*;
+pub use weak_scope::*;
 
 #[macro_export]
 macro_rules! maybe {
@@ -72,41 +77,6 @@ macro_rules! js_log_maybe {
     }};
 }
 
-/// A helper to for the pattern `let x2 = x;` necessary to clone structs
-/// destined for an `async` or `'static` closure stack.  This is like `move || {
-/// .. }` or `move async { .. }`, but for clone semantics.
-#[macro_export]
-macro_rules! clone {
-    ($i:ident) => {
-        let $i = $i.clone();
-    };
-    ($i:ident, $($tt:tt)*) => {
-        clone!($i);
-        clone!($($tt)*);
-    };
-    ($this:ident . $i:ident) => {
-        let $i = $this.$i.clone();
-    };
-    ($this:ident . $i:ident, $($tt:tt)*) => {
-        clone!($this . $i);
-        clone!($($tt)*);
-    };
-    ($this:ident . $borrow:ident() . $i:ident) => {
-        let $i = $this.$borrow().$i.clone();
-    };
-    ($this:ident . $borrow:ident() . $i:ident, $($tt:tt)*) => {
-        clone!($this.$borrow().$i);
-        clone!($($tt)*);
-    };
-    ($this:ident . $borrow:ident()) => {
-        let $borrow = $this.$borrow().clone();
-    };
-    ($this:ident . $borrow:ident(), $($tt:tt)*) => {
-        clone!($this.$borrow());
-        clone!($($tt)*);
-    };
-}
-
 #[macro_export]
 macro_rules! max {
     ($x:expr) => ($x);
@@ -133,4 +103,27 @@ macro_rules! min {
             y
         }
     }}
+}
+
+#[macro_export]
+macro_rules! js_log {
+    ($x:expr) => {{
+        const DEBUG_ONLY_WARNING: &str = $x;
+        web_sys::console::log_1(&wasm_bindgen::JsValue::from($x));
+    }};
+    ($x:expr $(, $y:expr)*) => {{
+        const DEBUG_ONLY_WARNING: &str = $x;
+        web_sys::console::log_1(&format!($x, $($y),*).into());
+    }};
+}
+
+#[macro_export]
+macro_rules! html_template {
+    ($($x:tt)*) => {{
+        html! {
+            <>
+                $($x)*
+            </>
+        }
+    }};
 }
